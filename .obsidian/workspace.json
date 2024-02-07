@@ -149,8 +149,10 @@
   "active": "83ca764dbcd3aab2",
   "lastOpenFiles": [
     "GSM_Simulator/sim",
+    "GSM_Simulator/User.o",
     "GSM_Simulator/Base_Station.o",
     "GSM_Simulator/Simulator.o",
+    "GSM_Simulator/Base_Station",
     "GSM_Simulator/User.h",
     "GSM_Simulator/User.cpp",
     "README.md",

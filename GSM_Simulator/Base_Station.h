@@ -11,7 +11,7 @@ class Base_Station {
         //std::vector<int> user;
 
     public:
-        std::vector<int> user;
+        //std::vector<int> user;
 
         Base_Station(int, float, float, float, float);
 
