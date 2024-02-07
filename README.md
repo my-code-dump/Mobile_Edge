@@ -1,2 +1,2 @@
-# Mobile_Edge
-Code dump for mobile edge compute.
+# Mobile Edge Repository
+Code dump for mobile edge compute shenanigans. 
