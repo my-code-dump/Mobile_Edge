@@ -1,0 +1,159 @@
+{
+  "main": {
+    "id": "2ec6d27b1037dc43",
+    "type": "split",
+    "children": [
+      {
+        "id": "f529ae542628d21c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "83ca764dbcd3aab2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "GSM_Simulator/README.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "71c70d3bb8f1cf92",
+    "type": "split",
+    "children": [
+      {
+        "id": "69d3d5c57661dd58",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6893e9aa999993ff",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "cb72f3a51746b96f",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "6983a3782ea78056",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "c4a3c37613a0bc33",
+    "type": "split",
+    "children": [
+      {
+        "id": "c1a397231745c176",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "88007648c3419b0e",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "GSM_Simulator/README.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "ae5de2062ac249cd",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "GSM_Simulator/README.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "8bb5da4c832a6005",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "fcd652a1e6b90e22",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "GSM_Simulator/README.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "83ca764dbcd3aab2",
+  "lastOpenFiles": [
+    "GSM_Simulator/sim",
+    "GSM_Simulator/Base_Station.o",
+    "GSM_Simulator/Simulator.o",
+    "GSM_Simulator/User.h",
+    "GSM_Simulator/User.cpp",
+    "README.md",
+    "GSM_Simulator/README.md"
+  ]
+}

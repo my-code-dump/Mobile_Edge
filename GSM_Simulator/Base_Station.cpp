@@ -50,3 +50,7 @@ void Base_Station::setMaxY (float y) {
 float Base_Station::returnMaxY () {
     return minY;
 }
+
+void Base_Station::printBTS() {
+    std::cout << "BST[" << BTS_ID << "]: {x:[" << minX << "," << maxX << "], y:[" << minY << "," << maxY << "]}" << std::endl;
+}

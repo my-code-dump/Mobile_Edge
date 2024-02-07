@@ -1,3 +1,6 @@
+#include <iostream>
+#include <vector>
+
 class Base_Station {
     private:
         int BTS_ID;
@@ -5,8 +8,11 @@ class Base_Station {
         float minY;
         float maxX;
         float maxY;
+        //std::vector<int> user;
 
     public:
+        std::vector<int> user;
+
         Base_Station(int, float, float, float, float);
 
         void setID (int);
@@ -28,4 +34,7 @@ class Base_Station {
         void setMaxY (float);
 
         float returnMaxY ();
+        
+        void printBTS();
+
 };
