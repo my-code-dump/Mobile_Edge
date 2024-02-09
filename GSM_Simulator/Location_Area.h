@@ -7,20 +7,14 @@
 
 class Location_Area {
     private:
-        int LASize;
-        int totalSize;
-        std::vector<Base_Station> LA_BSTs;
-        std::vector<Base_Station> ALL_BSTs;
+        int LAID;
+        float minX;
+        float maxX;
+        float minY;
+        float maxY;
     
     public:
-        Location_Area(int, int, std::vector<Base_Station> &All_BST);
-
-        void setLASize(int);
-        int getLASize(int);
-
-        void setTotalSize(int);
-
-        void determineOwnership ();
+        Location_Area(int, float, float, float, float);
 };
 
 #endif

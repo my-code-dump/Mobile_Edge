@@ -1,5 +1,6 @@
 #include "Base_Station.h"
 #include "User.h"
+#include "Location_Area.h"
 #include <cmath>
 #include <random>
 
@@ -9,7 +10,7 @@ struct GSM_Conditions {
     int totalUsers = 5000;
     int totalHours = 1;
     float sizeBST = 1;
-    float sizeLA = 2;
+    float sizeLA = 5;
     float areaSize = 10;
 } GSM;
 
@@ -23,8 +24,8 @@ void printBTSData (std::vector<Base_Station> &BST_List) {
 void initializeBTS (std::vector<Base_Station> &BST_List) {
     int maxSize = GSM.areaSize;
     int id = 1;
-    for(int i = 0; i < maxSize; i++) {
-        for (int j = 0; j < maxSize; j++) {
+    for(int i = 0; i <= maxSize; i++) {
+        for (int j = 0; j <= maxSize; j++) {
             Base_Station bst (id,j,i,j+1,i+1);
             BST_List.push_back(bst);
             id++;
@@ -78,6 +79,80 @@ void initializeUsers (std::vector<User> &User_List) {
     }
 }
 
+float findMax (std::vector<float> numbers) {
+    return 0;
+}
+
+void initializeLA (std::vector<Base_Station> &BST_List) {
+    int size = GSM.areaSize + 1;
+    int iterate = GSM.sizeLA;
+    int x = 0;
+    float minX = 0;
+    float maxX = 0;
+    int y = 0;
+    float minY = 0;
+    float maxY = 0;
+    int index = 0;
+    std::vector<Location_Area> LS_LIST;
+    std::vector<std::vector<int>> test_list;
+    std::vector<std::vector<float>> coor_list;
+
+    if (iterate != 0) {
+        int jump = 0;
+        int bstListSize = BST_List.size();
+        while (jump < bstListSize) {
+            int limit = jump + size;
+            for (int i = jump; i < limit; i+=iterate) {
+                int tempIterate = iterate - 1;
+                std::vector<int> block;
+                std::vector<float> blockFloat;
+                
+                int leftCornerTop = i;
+                block.push_back(leftCornerTop);
+
+                float minX = BST_List[leftCornerTop].returnMinX();
+                float miny = BST_List[leftCornerTop].returnMinY();
+                blockFloat.push_back(minX);
+
+                int rightCornerTop = i + tempIterate;
+                if (rightCornerTop >= limit) {
+                    rightCornerTop = limit - 1;
+                }
+                float maxX = BST_List[rightCornerTop].returnMaxX();
+                blockFloat.push_back(maxX);
+                block.push_back(rightCornerTop);
+                
+                int leftCornerBot = i + (size * (tempIterate));
+                while (leftCornerBot >= bstListSize) {
+                    tempIterate--;
+                    leftCornerBot = i + (size * tempIterate);
+                }
+                float maxY = BST_List[leftCornerBot].returnMaxY();
+                blockFloat.push_back(maxY);
+                block.push_back(leftCornerBot);
+                
+                test_list.push_back(block);
+                coor_list.push_back(blockFloat);
+                index++;
+            }
+            jump += iterate * size;
+        }
+         
+        for (int i = 0; i < test_list.size(); i++) {
+            std::cout << "[ ";
+            for (int j = 0; j < test_list[i].size(); j++) {
+                std::cout << test_list[i][j] << "=" << coor_list[i][j] << " ";
+            }
+            std::cout << "]";
+            std::cout << std::endl;
+        }
+        
+    }
+    else {
+        throw std::invalid_argument("Locational area is 0!");
+    }
+}
+
 // ----- Experiment -----
 void runExperiment (std::vector<Base_Station> BST_List, std::vector<User> User_List) { 
 
@@ -86,11 +161,12 @@ void runExperiment (std::vector<Base_Station> BST_List, std::vector<User> User_L
 int main () {
     std::vector<Base_Station> BST_List;
     initializeBTS(BST_List);
-    printBTSData(BST_List);
+    //printBTSData(BST_List);
 
     std::vector<User> User_List;
     initializeUsers(User_List);    
     //printUserData(User_List);
+    initializeLA(BST_List);
 
     return 0;
 }
