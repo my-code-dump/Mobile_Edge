@@ -1,3 +1,6 @@
+#ifndef BTS_H
+#define BTS_H
+
 #include <iostream>
 #include <vector>
 
@@ -8,10 +11,9 @@ class Base_Station {
         float minY;
         float maxX;
         float maxY;
-        //std::vector<int> user;
 
     public:
-        //std::vector<int> user;
+        std::vector<int> user;
 
         Base_Station(int, float, float, float, float);
 
@@ -35,6 +37,9 @@ class Base_Station {
 
         float returnMaxY ();
         
-        void printBTS();
+        void printBTSData();
 
+        Base_Station &retrieveBTS(int);
 };
+
+#endif

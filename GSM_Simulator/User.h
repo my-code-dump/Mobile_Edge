@@ -1,3 +1,6 @@
+#ifndef USER_H
+#define USER_H
+
 #include <iostream>
 #include <vector>
 
@@ -23,4 +26,8 @@ class User {
         void setUserY (float);
 
         float returnUserY ();
+
+        void printUserData (); 
 };
+
+#endif

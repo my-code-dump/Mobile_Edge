@@ -29,3 +29,7 @@ void User::setUserY (float y) {
 float User::returnUserY () {
     return userY;
 }
+
+void User::printUserData () {
+    std::cout << "User[" << USER_ID << "]: {x:" << userX << ", y:" << userY << "}" << std::endl; 
+}
