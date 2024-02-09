@@ -10,7 +10,7 @@ struct GSM_Conditions {
     int totalUsers = 5000;
     int totalHours = 1;
     float sizeBST = 1;
-    float sizeLA = 5;
+    float sizeLA = 3;
     float areaSize = 10;
 } GSM;
 
@@ -102,8 +102,8 @@ void initializeLA (std::vector<Base_Station> &BST_List) {
         int bstListSize = BST_List.size();
         while (jump < bstListSize) {
             int limit = jump + size;
-            for (int i = jump; i < limit; i+=iterate) {
-                int tempIterate = iterate - 1;
+            for (int i = jump; i <= limit; i+=iterate) {
+                int tempIterate = iterate;
                 std::vector<int> block;
                 std::vector<float> blockFloat;
                 
