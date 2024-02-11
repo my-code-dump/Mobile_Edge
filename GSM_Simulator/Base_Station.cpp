@@ -54,12 +54,3 @@ float Base_Station::returnMaxY () {
 void Base_Station::printBTSData() {
     std::cout << "BST[" << BTS_ID << "]: {x:[" << minX << "," << maxX << "], y:[" << minY << "," << maxY << "]}" << std::endl;
 }
-
-Base_Station &Base_Station::retrieveBTS(int ID) {
-    if (BTS_ID == ID) {
-        return *this;
-    }
-    else {
-        throw std::invalid_argument("ID does not match");
-    }
-}

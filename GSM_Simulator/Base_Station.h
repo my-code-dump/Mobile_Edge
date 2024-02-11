@@ -38,8 +38,6 @@ class Base_Station {
         float returnMaxY ();
         
         void printBTSData();
-
-        Base_Station &retrieveBTS(int);
 };
 
 #endif

@@ -1,9 +1,11 @@
 #include "User.h"
 
-User::User(int id, float user_X, float user_Y) {
+User::User(int id, float user_X, float user_Y, float move_to_X, float move_to_Y) {
     USER_ID = id;
     userX = user_X;
     userY = user_Y;
+    setMoveToX(move_to_X);
+    setMoveToY(move_to_Y);
 }
 
 void User::setID (int id) {
@@ -30,6 +32,52 @@ float User::returnUserY () {
     return userY;
 }
 
+void User::setMoveToX (float x) {
+    moveToX = x;
+    if (moveToX > userX) {
+        isMoveToXGreaterUserX = true;
+    }
+    else {
+        isMoveToXGreaterUserX = false;
+    }
+}
+
+float User::returnMoveToX () {
+    return moveToX;
+}
+
+void User::setMoveToY (float y) {
+    moveToY = y;
+    if (moveToY > userY) {
+        isMoveToYGreaterUserY = true;
+    }
+    else {
+        isMoveToYGreaterUserY = false;
+    }
+}
+
+float User::returnMoveToY () {
+    return moveToY;
+}
+
+void User::setIsMoveToXGreaterUserX (bool cond) {
+    isMoveToXGreaterUserX = cond;
+}
+
+bool User::returnIsMoveToXGreaterUserX () {
+    return isMoveToXGreaterUserX;
+}
+
+void User::setIsMoveToYGreaterUserY (bool cond) {
+    isMoveToYGreaterUserY = cond;
+}
+
+bool User::returnIsMoveToYGreaterUserY () {
+    return isMoveToYGreaterUserY;
+}
+
 void User::printUserData () {
     std::cout << "User[" << USER_ID << "]: {x:" << userX << ", y:" << userY << "}" << std::endl; 
 }
+
+
