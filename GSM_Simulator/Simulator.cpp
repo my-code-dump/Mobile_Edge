@@ -5,11 +5,13 @@
 #include <random>
 #include <ctime>
 #include <climits>
+#include <getopt.h>
+#include <errno.h>
 
 // All sizes are in KMs
 struct GSM_Conditions {
     int totalBST = 100;
-    int totalUsers = 5000;
+    int totalUsers = 100;
     int totalHours = 1;
     int sizeLA = 5;
     float sizeBST = 1;
@@ -62,7 +64,9 @@ void initializeLA (std::vector<Base_Station> &BST_List, std::vector<Location_Are
             int limit = jump + size;
             //td::cout << "limit = " << limit << std::endl;
             for (int i = jump; i < limit; i+=iterate) {
-                int tempIterate = iterate;
+                int xAxis = GSM.sizeLA;
+                int yAxis = GSM.sizeLA;
+                bool hitEdge = false;
                 std::vector<int> block;
                 std::vector<float> blockFloat;
                 
@@ -77,22 +81,36 @@ void initializeLA (std::vector<Base_Station> &BST_List, std::vector<Location_Are
 
                 int rightCornerTop = i + (iterate - 1);
                 if (rightCornerTop >= limit) {
-                    rightCornerTop = limit;
+                    rightCornerTop = limit - 1;
+                    xAxis = abs(rightCornerTop - i) + 1;
+                    hitEdge = true;
                 }
+
                 maxX = BST_List[rightCornerTop].returnMaxX();
                 blockFloat.push_back(maxX);
                 block.push_back(rightCornerTop);
                 
+                int tempIterate = iterate;
                 int leftCornerBot = i + (size * (iterate-1));
+                int tempLeftCornerBot = leftCornerBot;
                 while (leftCornerBot >= bstListSize) {
                     tempIterate--;
-                    leftCornerBot = i + (size * iterate);
+                    leftCornerBot = i + (size * tempIterate);
+                    yAxis = (abs(leftCornerBot - leftCornerTop)/size) + 1;
+                    //std::cout << "[" << i << "] LCB: " <<  leftCornerBot << " | tLCB: " << tempLeftCornerBot << std::endl;
+                    hitEdge = true;
                 }
                 maxY = BST_List[leftCornerBot].returnMaxY();
                 blockFloat.push_back(maxY);
                 block.push_back(leftCornerBot);
-                
-                Location_Area LA (index, minX, minY, maxX, maxY);
+                /*
+                if (hitEdge) {
+                    std::cout << "[" << i << "] xAxis: " <<  xAxis << " | yAxis: " << yAxis << std::endl;
+                    hitEdge = false;
+                }
+                */
+                int totalLAs = xAxis * yAxis;
+                Location_Area LA (index, minX, minY, maxX, maxY, totalLAs);
                 LA_List.push_back(LA);
                 test_list.push_back(block);
                 coor_list.push_back(blockFloat);
@@ -115,7 +133,7 @@ void initializeLA (std::vector<Base_Station> &BST_List, std::vector<Location_Are
     else {
         throw std::invalid_argument("Locational area is 0!");
     }
-    printLA(LA_List);
+    //printLA(LA_List);
 }
 
 // ----- Initialize user location -----
@@ -139,38 +157,19 @@ float pickANumber (float min, float max, float isClone) {
 
 void initializeUsers (std::vector<Location_Area> &LA_List, std::vector<User> &User_List) {
     int userID = 0;
-    int distributedUsers = sqrt(GSM.totalUsers);
-    int remainders = GSM.totalUsers - pow(distributedUsers,2);
-    float increment = (GSM.areaSize) / (distributedUsers - 1);
-    float yIncrement = 0;
+    int maxUsers = GSM.totalUsers;
 
-    for (int i = 0; i < distributedUsers; i++) {
-        float xIncrement = 0;
-        for (int j = 0; j < distributedUsers; j++) {
-            User usr(userID, xIncrement, yIncrement, 
-                    pickANumber(0,(GSM.areaSize), -1), pickANumber(0,(GSM.areaSize), -1));        
-            
-            xIncrement += increment;
-            User_List.push_back(usr);
-            userID++;
-        }
-        yIncrement += increment;
+    for (int i = 0; i < maxUsers; i++) {
+        User usr (userID, pickANumber(0,(GSM.areaSize), -1), pickANumber(0, (GSM.areaSize), -1), 
+                pickANumber(0,(GSM.areaSize), -1), pickANumber(0,(GSM.areaSize), -1));
+        
+        User_List.push_back(usr);
+        userID++;
     }
-    
-    if (remainders != 0) {
-        // Randomly distribute if the total # of users cannot be evenly distributed
-        int remainderID = GSM.totalUsers - remainders + 1;
-        for (int i = 0; i < remainders; i++) {
-            User usr (remainderID, pickANumber(0,(GSM.areaSize), -1), pickANumber(0, (GSM.areaSize), -1), 
-                    pickANumber(0,(GSM.areaSize), -1), pickANumber(0,(GSM.areaSize), -1));
-            
-            User_List.push_back(usr);
-            remainderID++;
-        }
-    }
-    
+
     int userLimit = GSM.totalUsers;
     int LAs = LA_List.size();
+
     for (int u = 0; u < userLimit; u++) { 
         float userX = User_List[u].returnUserX();
         float userY = User_List[u].returnUserY();
@@ -187,7 +186,6 @@ void initializeUsers (std::vector<Location_Area> &LA_List, std::vector<User> &Us
         }
         //User_List[u].printUserData();
     }
-
 }
 
 // Define the xorshift96 state variables
@@ -210,21 +208,10 @@ unsigned long xorshf96() {
 
 // Function to generate random float within a range [min, max]
 float getRandomFloatInRange(float min, float max) {
-    // Calculate the range
     float range = max - min;
-    
-    // Scale the random number and add min to ensure it falls within the range
     float randomNumber = (float)xorshf96() / (float)ULONG_MAX * range + min;
     
     return randomNumber;
-}
-
-float getPoisson () {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::poisson_distribution<> poisson(0.0125);
-
-    return poisson(gen);
 }
 
 int checkBST (std::vector<Location_Area> &LA_List, User &usr, float currentX, float currentY) {
@@ -255,7 +242,7 @@ int checkBST (std::vector<Location_Area> &LA_List, User &usr, float currentX, fl
 }
 
 // ----- Experiment -----
-int moveUser (std::vector<Location_Area> &LA_List, User &usr) {
+int moveUserAndLocationUpdate (std::vector<Location_Area> &LA_List, User &usr) {
     float goHereX = usr.returnMoveToX();
     float goHereY = usr.returnMoveToY();
     float currentX = usr.returnUserX();
@@ -306,19 +293,52 @@ int moveUser (std::vector<Location_Area> &LA_List, User &usr) {
     return result;
 }
 
+int getPoisson () {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::poisson_distribution<> poisson(0.0125);
+
+    return poisson(gen);
+}
+
+int pagingProcess(std::vector<Location_Area> &LA_List, User &user) {
+    int paging = 0;
+    int pois = getPoisson();
+    //std::cout << "poisson = " << pois << std::endl;
+    if (pois == 1) {
+        int index = user.getLAID();
+        paging = 60 * LA_List[index].returnTotalLA();
+    }
+
+    return paging;
+}
+
 void runExperiment (std::vector<Location_Area> LA_List, std::vector<User> User_List) { 
+    // File 1 - location update 
     char buffer[100];
     sprintf(buffer, "%dLAsizeLocationUpdate.csv", GSM.sizeLA);
     char *filename = buffer;
     FILE *fp;
     fp = fopen(filename, "w+");
+    fprintf(fp,"Seconds,Location_Update\n");
+    
+    // File 2 - paging proccess
+    sprintf(buffer, "%dLAsizePagingProcess.csv", GSM.sizeLA);
+    char *filename2 = buffer;
+    FILE *fp2;
+    fp2 = fopen(filename2, "w+");
+    fprintf(fp2,"Seconds,Paging_Process\n");
+
     int simulationLimit = GSM.totalHours * 60 * 60;
     int totalUsers = User_List.size();
-    User_List[0].printUserData();
+
+    //User_List[0].printUserData();
     for (int s = 0; s < simulationLimit; s++) {
         int locationUpdate = 0;
+        int pagingCalls = 0;
         for (int u = 0; u < GSM.totalUsers; u++) {
-            locationUpdate += moveUser(LA_List, User_List[u]);
+            locationUpdate += moveUserAndLocationUpdate(LA_List, User_List[u]);
+            pagingCalls += pagingProcess(LA_List, User_List[u]);
             //float test = getPoisson();
             if ((User_List[u].returnUserX() == User_List[u].returnMoveToX()) && (User_List[u].returnUserY() == User_List[u].returnMoveToY())) {
                 //std::cout << "User[" << u << "] Finished" << std::endl;
@@ -329,7 +349,8 @@ void runExperiment (std::vector<Location_Area> LA_List, std::vector<User> User_L
                 //std::cout << "=== GOAL ACHIEVED! renew! ===" << std::endl;
             }
         }
-        fprintf(fp,"%d,%d\n",s,locationUpdate);
+        fprintf(fp,"%d,%d\n", s, locationUpdate);
+        fprintf(fp2,"%d,%d\n", s, pagingCalls);
         std::cout << "s = " << s << std::endl;
         /*
         if (locationUpdate != 0){
@@ -360,17 +381,29 @@ void runExperiment (std::vector<Location_Area> LA_List, std::vector<User> User_L
     */
 }
 
+int main (int argc, char* argv[]) {
+    int n = 0;
+    int opt = 0;
+    while ((opt = getopt(argc,argv,"N:")) != -1) {
+        switch (opt) {
+            case 'N':
+                n = atoi(optarg);
+                break;
+            default:
+                printf("Invalid Inputs\n");
+                break;
+        }
+    }
 
-int main () {
+    GSM.sizeLA = n;
+
     std::vector<Base_Station> BST_List;
     initializeBTS(BST_List);
-    //printBTSData(BST_List);
     std::vector<Location_Area> LA_List;
     initializeLA(BST_List, LA_List);
 
     std::vector<User> User_List;
     initializeUsers(LA_List, User_List);    
-    //printUserData(User_List);
 
     runExperiment(LA_List, User_List);
     return 0;
