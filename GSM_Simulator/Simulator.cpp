@@ -9,9 +9,9 @@
 // All sizes are in KMs
 struct GSM_Conditions {
     int totalBST = 100;
-    int totalUsers = 100;
+    int totalUsers = 5000;
     int totalHours = 1;
-    int sizeLA = 1;
+    int sizeLA = 5;
     float sizeBST = 1;
     float areaSize = 10;
     float metersPerSecond = 0.10;
@@ -272,18 +272,18 @@ int moveUser (std::vector<Location_Area> &LA_List, User &usr) {
     }
     
     // Update current coordinates
-        currentX += distanceToTravel * cos(angle);
-        if (usr.returnIsMoveToXGreaterUserX()) {
-            if (currentX > goHereX) {
-                currentX = goHereX;
-            }
+    currentX += distanceToTravel * cos(angle);
+    if (usr.returnIsMoveToXGreaterUserX()) {
+        if (currentX > goHereX) {
+            currentX = goHereX;
         }
-        else {
-            if (currentX < goHereX) {
-                currentX = goHereX;
-            }
+    }
+    else {
+        if (currentX < goHereX) {
+            currentX = goHereX;
         }
-    //if ((currentY + distanceToTravel) )
+    }
+
     currentY += distanceToTravel * sin(angle);
     if (usr.returnIsMoveToYGreaterUserY()) {
         if (currentY > goHereY) {
@@ -295,7 +295,10 @@ int moveUser (std::vector<Location_Area> &LA_List, User &usr) {
             currentY = goHereY;
         }
     }
-
+    /*
+    std::cout << "Usr[" << usr.returnID() << "] | Current X = " << currentX << " Current Y = " 
+    << currentY << " | Goal x:" << goHereX << " Goal y:" << goHereY << std::endl; 
+    */
     usr.setUserX(currentX);
     usr.setUserY(currentY);
 
@@ -311,9 +314,10 @@ void runExperiment (std::vector<Location_Area> LA_List, std::vector<User> User_L
     fp = fopen(filename, "w+");
     int simulationLimit = GSM.totalHours * 60 * 60;
     int totalUsers = User_List.size();
+    User_List[0].printUserData();
     for (int s = 0; s < simulationLimit; s++) {
         int locationUpdate = 0;
-        for (int u = 0; u < totalUsers; u++) {
+        for (int u = 0; u < GSM.totalUsers; u++) {
             locationUpdate += moveUser(LA_List, User_List[u]);
             //float test = getPoisson();
             if ((User_List[u].returnUserX() == User_List[u].returnMoveToX()) && (User_List[u].returnUserY() == User_List[u].returnMoveToY())) {
@@ -322,11 +326,16 @@ void runExperiment (std::vector<Location_Area> LA_List, std::vector<User> User_L
                 float tempEndY = pickANumber(0,(GSM.areaSize), User_List[u].returnMoveToY());
                 User_List[u].setMoveToX(tempEndX);
                 User_List[u].setMoveToY(tempEndY);
+                //std::cout << "=== GOAL ACHIEVED! renew! ===" << std::endl;
             }
         }
         fprintf(fp,"%d,%d\n",s,locationUpdate);
         std::cout << "s = " << s << std::endl;
-        //std::cout << locationUpdate << std::endl; 
+        /*
+        if (locationUpdate != 0){
+            std::cout << "+Location Update KB:" << locationUpdate << std::endl; 
+        }
+        */
     }
     /*
     float curX = 10;

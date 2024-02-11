@@ -87,7 +87,8 @@ int User::getLAID () {
 }
 
 void User::printUserData () {
-    std::cout << "User[" << USER_ID << "]: {x:" << userX << ", y:" << userY << " , LAs:" << LA_ID << "}" << std::endl; 
+    std::cout << "User[" << USER_ID << "]: {x:" << userX << ", y:" << userY 
+    << " Goal x:" << moveToX << " Goal y:" << moveToY << " , LAs:" << LA_ID << "}" << std::endl; 
 }
 
 
