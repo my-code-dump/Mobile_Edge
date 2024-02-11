@@ -11,8 +11,8 @@ struct GSM_Conditions {
     int totalBST = 100;
     int totalUsers = 100;
     int totalHours = 1;
+    int sizeLA = 1;
     float sizeBST = 1;
-    float sizeLA = 3;
     float areaSize = 10;
     float metersPerSecond = 0.10;
     std::vector<int> network_traffic;
@@ -29,18 +29,22 @@ void printBTSData (std::vector<Base_Station> &BST_List) {
 void initializeBTS (std::vector<Base_Station> &BST_List) {
     int maxSize = GSM.areaSize;
     int id = 0;
-    for(int i = 0; i <= maxSize; i++) {
-        for (int j = 0; j <= maxSize; j++) {
+    for(int i = 0; i < maxSize; i++) {
+        for (int j = 0; j < maxSize; j++) {
             Base_Station bst (id,j,i,j+1,i+1);
             BST_List.push_back(bst);
             id++;
         }
     }
-    //printBTSData(BST_List);
 }
 
+void printLA (std::vector<Location_Area> &LA_List) {
+    for (int i = 0; i < LA_List.size(); i++) {
+       LA_List[i].printLAData(); 
+    }
+}
 void initializeLA (std::vector<Base_Station> &BST_List, std::vector<Location_Area> &LA_List) {
-    int size = GSM.areaSize + 1;
+    int size = GSM.areaSize;
     int iterate = GSM.sizeLA;
     int index = 0;
     float minX = 0;
@@ -53,49 +57,51 @@ void initializeLA (std::vector<Base_Station> &BST_List, std::vector<Location_Are
     if (iterate != 0) {
         int jump = 0;
         int bstListSize = BST_List.size();
+
         while (jump < bstListSize) {
             int limit = jump + size;
-            for (int i = jump; i < (limit - 1); i+=iterate) {
-                //std::vector<int> block;
-                //std::vector<float> blockFloat;
+            //td::cout << "limit = " << limit << std::endl;
+            for (int i = jump; i < limit; i+=iterate) {
+                int tempIterate = iterate;
+                std::vector<int> block;
+                std::vector<float> blockFloat;
                 
                 int leftCornerTop = i;
-                //block.push_back(leftCornerTop);
-                //block.push_back(leftCornerTop);
+                block.push_back(leftCornerTop);
+                block.push_back(leftCornerTop);
 
                 minX = BST_List[leftCornerTop].returnMinX();
                 minY = BST_List[leftCornerTop].returnMinY();
-                //blockFloat.push_back(minX);
-                //blockFloat.push_back(minY);
+                blockFloat.push_back(minX);
+                blockFloat.push_back(minY);
 
-                int rightCornerTop = i + iterate;
+                int rightCornerTop = i + (iterate - 1);
                 if (rightCornerTop >= limit) {
-                    rightCornerTop = limit - 1;
+                    rightCornerTop = limit;
                 }
                 maxX = BST_List[rightCornerTop].returnMaxX();
-                //blockFloat.push_back(maxX);
-                //block.push_back(rightCornerTop);
+                blockFloat.push_back(maxX);
+                block.push_back(rightCornerTop);
                 
-                int leftCornerBot = i + (size * iterate);
-                int tempIterate = iterate;
+                int leftCornerBot = i + (size * (iterate-1));
                 while (leftCornerBot >= bstListSize) {
                     tempIterate--;
-                    leftCornerBot = i + (size * tempIterate);
+                    leftCornerBot = i + (size * iterate);
                 }
                 maxY = BST_List[leftCornerBot].returnMaxY();
-                //blockFloat.push_back(maxY);
-                //block.push_back(leftCornerBot);
+                blockFloat.push_back(maxY);
+                block.push_back(leftCornerBot);
                 
-                //test_list.push_back(block);
-                //coor_list.push_back(blockFloat);
                 Location_Area LA (index, minX, minY, maxX, maxY);
                 LA_List.push_back(LA);
+                test_list.push_back(block);
+                coor_list.push_back(blockFloat);
                 index++;
             }
-            jump += (iterate + 1) * size;
-            //std::cout << jump << std::endl;
+            jump += iterate * size;
+            //std::cout << "jump = " << jump << std::endl;
         }
-        /*
+        /* 
         for (int i = 0; i < test_list.size(); i++) {
             std::cout << "[ ";
             for (int j = 0; j < test_list[i].size(); j++) {
@@ -109,6 +115,7 @@ void initializeLA (std::vector<Base_Station> &BST_List, std::vector<Location_Are
     else {
         throw std::invalid_argument("Locational area is 0!");
     }
+    printLA(LA_List);
 }
 
 // ----- Initialize user location -----
@@ -130,7 +137,7 @@ float pickANumber (float min, float max, float isClone) {
     return output;
 }
 
-void initializeUsers (std::vector<Base_Station> &BST_List, std::vector<User> &User_List) {
+void initializeUsers (std::vector<Location_Area> &LA_List, std::vector<User> &User_List) {
     int userID = 0;
     int distributedUsers = sqrt(GSM.totalUsers);
     int remainders = GSM.totalUsers - pow(distributedUsers,2);
@@ -161,7 +168,26 @@ void initializeUsers (std::vector<Base_Station> &BST_List, std::vector<User> &Us
             remainderID++;
         }
     }
-    //printUserData(User_List);
+    
+    int userLimit = GSM.totalUsers;
+    int LAs = LA_List.size();
+    for (int u = 0; u < userLimit; u++) { 
+        float userX = User_List[u].returnUserX();
+        float userY = User_List[u].returnUserY();
+        for (int l = 0; l < LAs; l++) {
+            float minX = LA_List[l].returnMinX();
+            float minY = LA_List[l].returnMinY();
+            float maxX = LA_List[l].returnMaxX();
+            float maxY = LA_List[l].returnMaxY();
+            if (((minX <= userX) && (maxX >= userX)) 
+                && (((minY <= userY) && (maxY >= userY)))) {
+                User_List[u].setLAID(LA_List[l].returnID());
+                break;
+            }
+        }
+        //User_List[u].printUserData();
+    }
+
 }
 
 // Define the xorshift96 state variables
@@ -193,8 +219,43 @@ float getRandomFloatInRange(float min, float max) {
     return randomNumber;
 }
 
+float getPoisson () {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::poisson_distribution<> poisson(0.0125);
+
+    return poisson(gen);
+}
+
+int checkBST (std::vector<Location_Area> &LA_List, User &usr, float currentX, float currentY) {
+    int updated = 0;
+    int laid = usr.getLAID();
+    int LAs = LA_List.size();
+    float minX = LA_List[laid].returnMinX();
+    float minY = LA_List[laid].returnMinY();
+    float maxX = LA_List[laid].returnMaxX();
+    float maxY = LA_List[laid].returnMaxY();
+    if (((minX > currentX) || (maxX < currentX)) 
+        || (((minY > currentY) || (maxY < currentY)))) {
+        for (int l = 0; l < LAs; l++) {
+            float minX = LA_List[l].returnMinX();
+            float minY = LA_List[l].returnMinY();
+            float maxX = LA_List[l].returnMaxX();
+            float maxY = LA_List[l].returnMaxY();
+            if (((minX <= currentX) && (maxX >= currentX)) 
+                && (((minY <= currentY) && (maxY >= currentY)))) {
+                usr.setLAID(LA_List[l].returnID());
+                break;
+            }
+        }
+        updated = 800;
+    }
+
+    return updated;
+}
+
 // ----- Experiment -----
-void moveUser (User &usr) {
+int moveUser (std::vector<Location_Area> &LA_List, User &usr) {
     float goHereX = usr.returnMoveToX();
     float goHereY = usr.returnMoveToY();
     float currentX = usr.returnUserX();
@@ -234,18 +295,27 @@ void moveUser (User &usr) {
             currentY = goHereY;
         }
     }
+
     usr.setUserX(currentX);
     usr.setUserY(currentY);
+
+    int result = checkBST(LA_List, usr, currentX, currentY);
+    return result;
 }
 
-void runExperiment (std::vector<Base_Station> BST_List, std::vector<User> User_List) { 
+void runExperiment (std::vector<Location_Area> LA_List, std::vector<User> User_List) { 
+    char buffer[100];
+    sprintf(buffer, "%dLAsizeLocationUpdate.csv", GSM.sizeLA);
+    char *filename = buffer;
+    FILE *fp;
+    fp = fopen(filename, "w+");
     int simulationLimit = GSM.totalHours * 60 * 60;
     int totalUsers = User_List.size();
     for (int s = 0; s < simulationLimit; s++) {
-        std::cout << "s = " << s << std::endl;
+        int locationUpdate = 0;
         for (int u = 0; u < totalUsers; u++) {
-            //std::cout << "u = " << u << std::endl;
-            moveUser(User_List[u]);
+            locationUpdate += moveUser(LA_List, User_List[u]);
+            //float test = getPoisson();
             if ((User_List[u].returnUserX() == User_List[u].returnMoveToX()) && (User_List[u].returnUserY() == User_List[u].returnMoveToY())) {
                 //std::cout << "User[" << u << "] Finished" << std::endl;
                 float tempEndX = pickANumber(0,(GSM.areaSize), User_List[u].returnMoveToX());
@@ -254,6 +324,9 @@ void runExperiment (std::vector<Base_Station> BST_List, std::vector<User> User_L
                 User_List[u].setMoveToY(tempEndY);
             }
         }
+        fprintf(fp,"%d,%d\n",s,locationUpdate);
+        std::cout << "s = " << s << std::endl;
+        //std::cout << locationUpdate << std::endl; 
     }
     /*
     float curX = 10;
@@ -278,17 +351,18 @@ void runExperiment (std::vector<Base_Station> BST_List, std::vector<User> User_L
     */
 }
 
+
 int main () {
     std::vector<Base_Station> BST_List;
     initializeBTS(BST_List);
     //printBTSData(BST_List);
-    std::vector<Location_Area> LA_LIST;
-    initializeLA(BST_List, LA_LIST);
+    std::vector<Location_Area> LA_List;
+    initializeLA(BST_List, LA_List);
 
     std::vector<User> User_List;
-    initializeUsers(BST_List, User_List);    
-    printUserData(User_List);
+    initializeUsers(LA_List, User_List);    
+    //printUserData(User_List);
 
-    //runExperiment(BST_List, User_List);
+    runExperiment(LA_List, User_List);
     return 0;
 }

@@ -40,7 +40,7 @@ void Base_Station::setMaxX (float x) {
 }
 
 float Base_Station::returnMaxX () {
-    return minX;
+    return maxX;
 }
 
 void Base_Station::setMaxY (float y) {
@@ -48,7 +48,7 @@ void Base_Station::setMaxY (float y) {
 }
 
 float Base_Station::returnMaxY () {
-    return minY;
+    return maxY;
 }
 
 void Base_Station::printBTSData() {

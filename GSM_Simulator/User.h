@@ -9,7 +9,7 @@
 class User {
     private:
         int USER_ID;
-        int BS_ID;
+        int LA_ID;
         bool isMoveToXGreaterUserX;
         bool isMoveToYGreaterUserY;
         float userX;
@@ -49,6 +49,10 @@ class User {
         void setIsMoveToYGreaterUserY (bool);
 
         bool returnIsMoveToYGreaterUserY ();
+
+        void setLAID (int);
+
+        int getLAID ();
 
         void printUserData (); 
 };

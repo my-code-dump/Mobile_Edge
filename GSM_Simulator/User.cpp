@@ -2,6 +2,7 @@
 
 User::User(int id, float user_X, float user_Y, float move_to_X, float move_to_Y) {
     USER_ID = id;
+    LA_ID = -1;
     userX = user_X;
     userY = user_Y;
     setMoveToX(move_to_X);
@@ -53,6 +54,7 @@ void User::setMoveToY (float y) {
     }
     else {
         isMoveToYGreaterUserY = false;
+
     }
 }
 
@@ -76,8 +78,16 @@ bool User::returnIsMoveToYGreaterUserY () {
     return isMoveToYGreaterUserY;
 }
 
+ void User::setLAID (int ID) {
+    LA_ID = ID;
+ }
+
+int User::getLAID () {
+    return LA_ID;
+}
+
 void User::printUserData () {
-    std::cout << "User[" << USER_ID << "]: {x:" << userX << ", y:" << userY << "}" << std::endl; 
+    std::cout << "User[" << USER_ID << "]: {x:" << userX << ", y:" << userY << " , LAs:" << LA_ID << "}" << std::endl; 
 }
 
 

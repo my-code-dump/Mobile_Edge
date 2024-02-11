@@ -3,7 +3,6 @@
 
 #include "Base_Station.h"
 #include <iostream>
-#include <vector>
 
 class Location_Area {
     private:
