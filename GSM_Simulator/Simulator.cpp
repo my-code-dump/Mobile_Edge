@@ -31,6 +31,7 @@ void initializeBTS (std::vector<Base_Station> &BST_List) {
             id++;
         }
     }
+    //printBTSData(BST_List);
 }
 
 // ----- Initialize user location -----
@@ -86,13 +87,11 @@ float findMax (std::vector<float> numbers) {
 void initializeLA (std::vector<Base_Station> &BST_List) {
     int size = GSM.areaSize + 1;
     int iterate = GSM.sizeLA;
-    int x = 0;
+    int index = 0;
     float minX = 0;
     float maxX = 0;
-    int y = 0;
     float minY = 0;
     float maxY = 0;
-    int index = 1;
     std::vector<Location_Area> LS_LIST;
     std::vector<std::vector<int>> test_list;
     std::vector<std::vector<float>> coor_list;
@@ -102,23 +101,25 @@ void initializeLA (std::vector<Base_Station> &BST_List) {
         int bstListSize = BST_List.size();
         while (jump < bstListSize) {
             int limit = jump + size;
-            for (int i = jump; i <= limit; i+=iterate) {
+            for (int i = jump; i < (limit - 1); i+=iterate) {
                 int tempIterate = iterate;
                 std::vector<int> block;
                 std::vector<float> blockFloat;
                 
                 int leftCornerTop = i;
                 block.push_back(leftCornerTop);
+                block.push_back(leftCornerTop);
 
-                float minX = BST_List[leftCornerTop].returnMinX();
-                float miny = BST_List[leftCornerTop].returnMinY();
+                minX = BST_List[leftCornerTop].returnMinX();
+                minY = BST_List[leftCornerTop].returnMinY();
                 blockFloat.push_back(minX);
+                blockFloat.push_back(minY);
 
                 int rightCornerTop = i + tempIterate;
                 if (rightCornerTop >= limit) {
                     rightCornerTop = limit - 1;
                 }
-                float maxX = BST_List[rightCornerTop].returnMaxX();
+                maxX = BST_List[rightCornerTop].returnMaxX();
                 blockFloat.push_back(maxX);
                 block.push_back(rightCornerTop);
                 
@@ -127,7 +128,7 @@ void initializeLA (std::vector<Base_Station> &BST_List) {
                     tempIterate--;
                     leftCornerBot = i + (size * tempIterate);
                 }
-                float maxY = BST_List[leftCornerBot].returnMaxY();
+                maxY = BST_List[leftCornerBot].returnMaxY();
                 blockFloat.push_back(maxY);
                 block.push_back(leftCornerBot);
                 
@@ -136,9 +137,9 @@ void initializeLA (std::vector<Base_Station> &BST_List) {
                 Location_Area LA (index, minX, minY, maxX, maxY);
                 index++;
             }
-            jump += iterate * size;
+            jump += (iterate + 1) * size;
+            //std::cout << jump << std::endl;
         }
-         
         for (int i = 0; i < test_list.size(); i++) {
             std::cout << "[ ";
             for (int j = 0; j < test_list[i].size(); j++) {
@@ -147,7 +148,6 @@ void initializeLA (std::vector<Base_Station> &BST_List) {
             std::cout << "]";
             std::cout << std::endl;
         }
-        
     }
     else {
         throw std::invalid_argument("Locational area is 0!");
