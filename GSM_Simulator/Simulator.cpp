@@ -54,7 +54,7 @@ void initializeUsers (std::vector<User> &User_List) {
     int userID = 1;
     int distributedUsers = sqrt(GSM.totalUsers);
     int remainders = GSM.totalUsers - pow(distributedUsers,2);
-    float increment = GSM.areaSize / (distributedUsers - 1);
+    float increment = (GSM.areaSize + 1) / (distributedUsers - 1);
     float yIncrement = 0;
 
     for (int i = 0; i < distributedUsers; i++) {
@@ -72,7 +72,7 @@ void initializeUsers (std::vector<User> &User_List) {
         // Randomly distribute if the total # of users cannot be evenly distributed
         int remainderID = GSM.totalUsers - remainders + 1;
         for (int i = 0; i < remainders; i++) {
-            User usr (remainderID,pickANumber(0,GSM.areaSize),pickANumber(0,GSM.areaSize));
+            User usr (remainderID,pickANumber(0,(GSM.areaSize + 1)),pickANumber(0, (GSM.areaSize + 1)));
             User_List.push_back(usr);
             remainderID++;
         }
@@ -92,7 +92,7 @@ void initializeLA (std::vector<Base_Station> &BST_List) {
     int y = 0;
     float minY = 0;
     float maxY = 0;
-    int index = 0;
+    int index = 1;
     std::vector<Location_Area> LS_LIST;
     std::vector<std::vector<int>> test_list;
     std::vector<std::vector<float>> coor_list;
@@ -133,6 +133,7 @@ void initializeLA (std::vector<Base_Station> &BST_List) {
                 
                 test_list.push_back(block);
                 coor_list.push_back(blockFloat);
+                Location_Area LA (index, minX, minY, maxX, maxY);
                 index++;
             }
             jump += iterate * size;
