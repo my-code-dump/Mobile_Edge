@@ -7,13 +7,14 @@
 class Location_Area {
     private:
         int LA_ID;
+        int totalLA;
         float minX;
         float maxX;
         float minY;
         float maxY;
     
     public:
-        Location_Area(int, float, float, float, float);
+        Location_Area(int, float, float, float, float, int);
 
         int returnID ();
         
@@ -24,6 +25,10 @@ class Location_Area {
         float returnMinY();
         
         float returnMaxY();
+
+        void setTotalLA (int);
+
+        int returnTotalLA ();
 
         void printLAData();
 };

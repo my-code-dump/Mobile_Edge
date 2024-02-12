@@ -11,7 +11,7 @@
 // All sizes are in KMs
 struct GSM_Conditions {
     int totalBST = 100;
-    int totalUsers = 100;
+    int totalUsers = 5000;
     int totalHours = 1;
     int sizeLA = 5;
     float sizeBST = 1;
@@ -21,7 +21,45 @@ struct GSM_Conditions {
     std::vector<int> paging_traffic;
 } GSM;
 
-// ----- Initialize base stations -----
+// ----- Randomizer functions needed for downstairs -----
+float pickANumber (float min, float max, float isClone) {
+    std::random_device rd;
+    std::mt19937 seed(rd());
+
+    std::uniform_real_distribution<float> dis(min, max);
+    float output = dis(seed);
+    if (isClone == output) {
+        pickANumber (min, max, isClone);
+    }
+    return output;
+}
+
+// Define the xorshift96 state variables
+static unsigned long x = 123456789, y = 362436069, z = 521288629;
+
+// xorshift96 pseudorandom number generator function
+unsigned long xorshf96() {
+    unsigned long t;
+    x ^= x << 16;
+    x ^= x >> 5;
+    x ^= x << 1;
+
+    t = x;
+    x = y;
+    y = z;
+    z = t ^ x ^ y;
+
+    return z;
+}
+
+// Function to generate random float within a range [min, max]
+float getRandomFloatInRange(float min, float max) {
+    float range = max - min;
+    float randomNumber = (float)xorshf96() / (float)ULONG_MAX * range + min;
+    
+    return randomNumber;
+}
+// ----- Initialize Base Stations -----
 void printBTSData (std::vector<Base_Station> &BST_List) {
     for (int i = 0; i < BST_List.size(); i++) {
        BST_List[i].printBTSData(); 
@@ -40,6 +78,7 @@ void initializeBTS (std::vector<Base_Station> &BST_List) {
     }
 }
 
+// ----- Initializing the Location Area -----
 void printLA (std::vector<Location_Area> &LA_List) {
     for (int i = 0; i < LA_List.size(); i++) {
        LA_List[i].printLAData(); 
@@ -62,33 +101,20 @@ void initializeLA (std::vector<Base_Station> &BST_List, std::vector<Location_Are
 
         while (jump < bstListSize) {
             int limit = jump + size;
-            //td::cout << "limit = " << limit << std::endl;
             for (int i = jump; i < limit; i+=iterate) {
                 int xAxis = GSM.sizeLA;
                 int yAxis = GSM.sizeLA;
-                bool hitEdge = false;
-                std::vector<int> block;
-                std::vector<float> blockFloat;
                 
                 int leftCornerTop = i;
-                block.push_back(leftCornerTop);
-                block.push_back(leftCornerTop);
-
                 minX = BST_List[leftCornerTop].returnMinX();
                 minY = BST_List[leftCornerTop].returnMinY();
-                blockFloat.push_back(minX);
-                blockFloat.push_back(minY);
 
                 int rightCornerTop = i + (iterate - 1);
                 if (rightCornerTop >= limit) {
                     rightCornerTop = limit - 1;
                     xAxis = abs(rightCornerTop - i) + 1;
-                    hitEdge = true;
                 }
-
                 maxX = BST_List[rightCornerTop].returnMaxX();
-                blockFloat.push_back(maxX);
-                block.push_back(rightCornerTop);
                 
                 int tempIterate = iterate;
                 int leftCornerBot = i + (size * (iterate-1));
@@ -97,63 +123,29 @@ void initializeLA (std::vector<Base_Station> &BST_List, std::vector<Location_Are
                     tempIterate--;
                     leftCornerBot = i + (size * tempIterate);
                     yAxis = (abs(leftCornerBot - leftCornerTop)/size) + 1;
-                    //std::cout << "[" << i << "] LCB: " <<  leftCornerBot << " | tLCB: " << tempLeftCornerBot << std::endl;
-                    hitEdge = true;
                 }
                 maxY = BST_List[leftCornerBot].returnMaxY();
-                blockFloat.push_back(maxY);
-                block.push_back(leftCornerBot);
-                /*
-                if (hitEdge) {
-                    std::cout << "[" << i << "] xAxis: " <<  xAxis << " | yAxis: " << yAxis << std::endl;
-                    hitEdge = false;
-                }
-                */
+                
                 int totalLAs = xAxis * yAxis;
                 Location_Area LA (index, minX, minY, maxX, maxY, totalLAs);
                 LA_List.push_back(LA);
-                test_list.push_back(block);
-                coor_list.push_back(blockFloat);
                 index++;
             }
             jump += iterate * size;
-            //std::cout << "jump = " << jump << std::endl;
         }
-        /* 
-        for (int i = 0; i < test_list.size(); i++) {
-            std::cout << "[ ";
-            for (int j = 0; j < test_list[i].size(); j++) {
-                std::cout << test_list[i][j] << "=" << coor_list[i][j] << " ";
-            }
-            std::cout << "]";
-            std::cout << std::endl;
-        }
-        */
     }
     else {
         throw std::invalid_argument("Locational area is 0!");
     }
-    //printLA(LA_List);
 }
 
-// ----- Initialize user location -----
+// ----- Initialize User Location -----
 void printUserData (std::vector<User> &User_List) {
     for (int i = 0; i < User_List.size(); i++) {
        User_List[i].printUserData(); 
     }
 }
 
-float pickANumber (float min, float max, float isClone) {
-    std::random_device rd;
-    std::mt19937 seed(rd());
-
-    std::uniform_real_distribution<float> dis(min, max);
-    float output = dis(seed);
-    if (isClone == output) {
-        pickANumber (min, max, isClone);
-    }
-    return output;
-}
 
 void initializeUsers (std::vector<Location_Area> &LA_List, std::vector<User> &User_List) {
     int userID = 0;
@@ -184,37 +176,13 @@ void initializeUsers (std::vector<Location_Area> &LA_List, std::vector<User> &Us
                 break;
             }
         }
-        //User_List[u].printUserData();
     }
 }
 
-// Define the xorshift96 state variables
-static unsigned long x = 123456789, y = 362436069, z = 521288629;
+// ----- Experiment Section -----
 
-// xorshift96 pseudorandom number generator function
-unsigned long xorshf96() {
-    unsigned long t;
-    x ^= x << 16;
-    x ^= x >> 5;
-    x ^= x << 1;
-
-    t = x;
-    x = y;
-    y = z;
-    z = t ^ x ^ y;
-
-    return z;
-}
-
-// Function to generate random float within a range [min, max]
-float getRandomFloatInRange(float min, float max) {
-    float range = max - min;
-    float randomNumber = (float)xorshf96() / (float)ULONG_MAX * range + min;
-    
-    return randomNumber;
-}
-
-int checkBST (std::vector<Location_Area> &LA_List, User &usr, float currentX, float currentY) {
+// This function is for checking if the user has moved out of the location area.
+int checkLA (std::vector<Location_Area> &LA_List, User &usr, float currentX, float currentY) {
     int updated = 0;
     int laid = usr.getLAID();
     int LAs = LA_List.size();
@@ -241,14 +209,16 @@ int checkBST (std::vector<Location_Area> &LA_List, User &usr, float currentX, fl
     return updated;
 }
 
-// ----- Experiment -----
+// This function is to get the direction of the user
 int moveUserAndLocationUpdate (std::vector<Location_Area> &LA_List, User &usr) {
     float goHereX = usr.returnMoveToX();
     float goHereY = usr.returnMoveToY();
     float currentX = usr.returnUserX();
     float currentY = usr.returnUserY();
+    // get a distance in meters between 0 to 10
     float distanceToTravel = getRandomFloatInRange(0.0,0.10001);
 
+    // IDK this is crazy math I don't understand it just works I guess
     float angle = 0;
     if (goHereX != currentX && goHereY != currentY) {
         angle = atan2(goHereY - currentY, goHereX - currentX);
@@ -282,17 +252,16 @@ int moveUserAndLocationUpdate (std::vector<Location_Area> &LA_List, User &usr) {
             currentY = goHereY;
         }
     }
-    /*
-    std::cout << "Usr[" << usr.returnID() << "] | Current X = " << currentX << " Current Y = " 
-    << currentY << " | Goal x:" << goHereX << " Goal y:" << goHereY << std::endl; 
-    */
+
     usr.setUserX(currentX);
     usr.setUserY(currentY);
 
-    int result = checkBST(LA_List, usr, currentX, currentY);
+    int result = checkLA(LA_List, usr, currentX, currentY);
     return result;
 }
 
+// This funciton is needed to check for the paging proccess where the user 
+// can receive a call every 0.0125 sec. Based on poisson.
 int getPoisson () {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -313,6 +282,8 @@ int pagingProcess(std::vector<Location_Area> &LA_List, User &user) {
     return paging;
 }
 
+// Main experiment function. It does both the location updates and paging request and prints 
+// data is csv where a python script will be doing the graphing
 void runExperiment (std::vector<Location_Area> LA_List, std::vector<User> User_List) { 
     // File 1 - location update 
     char buffer[100];
@@ -332,57 +303,28 @@ void runExperiment (std::vector<Location_Area> LA_List, std::vector<User> User_L
     int simulationLimit = GSM.totalHours * 60 * 60;
     int totalUsers = User_List.size();
 
-    //User_List[0].printUserData();
     for (int s = 0; s < simulationLimit; s++) {
         int locationUpdate = 0;
         int pagingCalls = 0;
         for (int u = 0; u < GSM.totalUsers; u++) {
             locationUpdate += moveUserAndLocationUpdate(LA_List, User_List[u]);
             pagingCalls += pagingProcess(LA_List, User_List[u]);
-            //float test = getPoisson();
             if ((User_List[u].returnUserX() == User_List[u].returnMoveToX()) && (User_List[u].returnUserY() == User_List[u].returnMoveToY())) {
-                //std::cout << "User[" << u << "] Finished" << std::endl;
                 float tempEndX = pickANumber(0,(GSM.areaSize), User_List[u].returnMoveToX());
                 float tempEndY = pickANumber(0,(GSM.areaSize), User_List[u].returnMoveToY());
                 User_List[u].setMoveToX(tempEndX);
                 User_List[u].setMoveToY(tempEndY);
-                //std::cout << "=== GOAL ACHIEVED! renew! ===" << std::endl;
             }
         }
         fprintf(fp,"%d,%d\n", s, locationUpdate);
         fprintf(fp2,"%d,%d\n", s, pagingCalls);
         std::cout << "s = " << s << std::endl;
-        /*
-        if (locationUpdate != 0){
-            std::cout << "+Location Update KB:" << locationUpdate << std::endl; 
-        }
-        */
     }
-    /*
-    float curX = 10;
-    float curY = 10;
-    float endX = 0;
-    float endY = 0;
-    User test (0,curX,curY,endX,endY);
-    for (int i = 0; i < 3600; i++) {
-        moveUser(test);
-        std::cout << "At x:" << test.returnUserX() << " y:" << test.returnUserY() << 
-        " | Final Destination x:" << test.returnMoveToX() << " y:" << test.returnMoveToY() << std::endl;
-        if ((test.returnUserX() == test.returnMoveToX()) && (test.returnUserY() == test.returnMoveToY())) {
-                std::cout << "User[" << "test" << "] Finished" << std::endl;
-            std::cout << "finished i=" << i << std::endl;
-            break;
-            float tempEndX = pickANumber(0,(GSM.areaSize), test.returnMoveToX());
-            float tempEndY = pickANumber(0,(GSM.areaSize), test.returnMoveToY());
-            test.setMoveToX(tempEndX);
-            test.setMoveToY(tempEndY);
-        }
-    }
-    */
 }
 
 int main (int argc, char* argv[]) {
     int n = 0;
+    int m = 0;
     int opt = 0;
     while ((opt = getopt(argc,argv,"N:")) != -1) {
         switch (opt) {
